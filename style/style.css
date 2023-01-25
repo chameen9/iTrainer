@@ -1,0 +1,9 @@
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+footer:after{
+  content: 'Chameensandeepa';
+  display: block;
+  position: relative;
+  color: tomato;
+  height: 1px;
+}
