@@ -7,3 +7,4 @@ footer:after{
   color: tomato;
   height: 1px;
 }
+header {visibility: hidden}
