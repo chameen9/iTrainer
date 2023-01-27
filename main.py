@@ -1,12 +1,13 @@
 import mediapipe as mp
-import numpy as np
-import cv2
-import os
 import streamlit as st
-import requests
-import streamlit_lottie as lottie
-from PIL import Image
-import time
+import numpy as np                  # for array manipulation and mathematical operations
+import cv2                          # open-source computer vision library
+import os                           # for interacting with the operating system
+import requests                     # for making HTTP requests
+import streamlit_lottie as lottie   # for displaying animation in streamlit
+from PIL import Image               # for opening and manipulating image files
+import time                         # for getting current time and performing time-related operations
+
 
 ################################################################################################
 ######################################## WEB CONFIG ############################################
@@ -104,6 +105,26 @@ with st.container():
             shot = st.selectbox('Select the Batting Shot', batting_shots)
             if (shot == 'Drive'):
                 bt_shot = 'drive'
+
+                ##### File uploader
+                uploaded_file = st.file_uploader("Choose a video")
+                if uploaded_file is not None:
+                    # To read file as bytes:
+                    bytes_data = uploaded_file.getvalue()
+                    st.write(bytes_data)
+
+                    # To convert to a string based IO:
+                    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+                    st.write(stringio)
+
+                    # To read file as string:
+                    string_data = stringio.read()
+                    st.write(string_data)
+
+                    # Can be used wherever a "file-like" object is accepted:
+                    dataframe = pd.read_csv(uploaded_file)
+                    st.write(dataframe)
+                ##### File uploader
 
                 drivestartbtn = st.button("Start")
 
