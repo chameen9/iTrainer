@@ -160,7 +160,6 @@ with st.container():
                                 npy_path = os.path.join(DATA_PATH, action, str(frame_num) + action)
                                 np.save(npy_path, final)
                                 cv2.imwrite(output_photo_path + '\\' + str(frame_num) + "_with_landmarks.png", image)
-
                                 end_time = time.time()
                                 processing_time = end_time - start_time
                                 time.sleep(processing_time)
