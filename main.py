@@ -36,6 +36,11 @@ local_css("style/style.css")
 
 #Lottie SRC
 lottie_gradient = load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_anre6w2q.json")
+lottie_spin = load_lottieurl("https://assets8.lottiefiles.com/packages/lf20_Q7WY7CfUco.json")
+lottie_round = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_LRpJsSdNGx.json")
+lottie_orb = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_bsMaAjKPuo.json")
+lottie_spin2 = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_s05JQM.json")
+lottie_no = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_lB5CzX.json")
 logo = Image.open("images/Logo.png")
 
 ################################################################################################
@@ -107,23 +112,23 @@ with st.container():
                 bt_shot = 'drive'
 
                 ##### File uploader
-                uploaded_file = st.file_uploader("Choose a video")
-                if uploaded_file is not None:
-                    # To read file as bytes:
-                    bytes_data = uploaded_file.getvalue()
-                    st.write(bytes_data)
+                #uploaded_file = st.file_uploader("Choose a video")
+                #if uploaded_file is not None:
+                #    # To read file as bytes:
+                #    bytes_data = uploaded_file.getvalue()
+                #    st.write(bytes_data)
 
-                    # To convert to a string based IO:
-                    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-                    st.write(stringio)
+                #    # To convert to a string based IO:
+                #    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+                #    st.write(stringio)
 
-                    # To read file as string:
-                    string_data = stringio.read()
-                    st.write(string_data)
+                #    # To read file as string:
+                #    string_data = stringio.read()
+                #    st.write(string_data)
 
-                    # Can be used wherever a "file-like" object is accepted:
-                    dataframe = pd.read_csv(uploaded_file)
-                    st.write(dataframe)
+                #    # Can be used wherever a "file-like" object is accepted:
+                #    dataframe = pd.read_csv(uploaded_file)
+                #    st.write(dataframe)
                 ##### File uploader
 
                 drivestartbtn = st.button("Start")
@@ -201,7 +206,7 @@ left2, center2, right2 = st.columns(3)
 with left2:
     st.empty()
 with center2:
-    st.markdown("<p style='text-align: center; color: white;'>The AI Powered personnel trainer</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: white;'>The AI Powered personal trainer</p>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: white;'>&copy; 2023 <i>iTrainer</i></p>", unsafe_allow_html=True)
 with right2:
     st.empty()

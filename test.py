@@ -4,7 +4,7 @@ conn = sqlite3.connect('data.db',check_same_thread=False)
 cur = conn.cursor()
 
 def form():
-    st.write('Title')
+    st.write('Your Information')
     with st.form(key='Information Form'):
         name = st.text_input('Enter your name')
         age = st.number_input('Enter your age')
@@ -14,7 +14,7 @@ def form():
             addData(name,age,date)
 
 def addData(a,b,c):
-    #cur.execute("""CREATE TABLE IF NOT EXISTS user(NAME TEXT(50),AGE TEXT(20),DOB TEXT(30));""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS user(NAME TEXT(50),AGE TEXT(20),DOB TEXT(30));""")
     cur.execute("INSERT INTO User VALUES (?,?,?)",(a,b,c))
     conn.commit()
     conn.close()
