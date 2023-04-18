@@ -1,5 +1,9 @@
 import mediapipe as mp
 import streamlit as st
+import pickle
+import matplotlib.pyplot as plt
+import io
+import pandas as pd
 import numpy as np                  # for array manipulation and mathematical operations
 import cv2                          # open-source computer vision library
 import os                           # for interacting with the operating system
@@ -7,7 +11,7 @@ import requests                     # for making HTTP requests
 import streamlit_lottie as lottie   # for displaying animation in streamlit
 from PIL import Image               # for opening and manipulating image files
 import time                         # for getting current time and performing time-related operations
-
+import datetime
 
 ################################################################################################
 ######################################## WEB CONFIG ############################################
@@ -36,11 +40,6 @@ local_css("style/style.css")
 
 #Lottie SRC
 lottie_gradient = load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_anre6w2q.json")
-lottie_spin = load_lottieurl("https://assets8.lottiefiles.com/packages/lf20_Q7WY7CfUco.json")
-lottie_round = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_LRpJsSdNGx.json")
-lottie_orb = load_lottieurl("https://assets2.lottiefiles.com/packages/lf20_bsMaAjKPuo.json")
-lottie_spin2 = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_s05JQM.json")
-lottie_no = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_lB5CzX.json")
 logo = Image.open("images/Logo.png")
 
 ################################################################################################
@@ -55,7 +54,7 @@ pose = mp_pose.Pose()
 # initialize mediaPipe pose solution
 
 # No of photos in the folder
-sequence_length = 70
+#sequence_length = 70
 
 def mediapipe_detection(image, model):
     #print("entered mediapipe detection")
@@ -83,6 +82,481 @@ def extract_body_keypoints(results):
     #st.write(kp)
     return kp
 
+def load_image(img_file):
+    img = cv2.imread(img_file, cv2.IMREAD_UNCHANGED)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = img.astype('float32') / 255.0
+    return img
+
+def load_image(image_file):
+    img = Image.open(image_file)
+    return img
+
+def calculate_angle(a,b,c):
+    a = np.array(a)
+    b = np.array(b)
+    c = np.array(c)
+
+    radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
+    angle = np.abs(radians*180.0/np.pi)
+
+    if angle > 180.0:
+        angle = 360-angle
+    return angle
+
+def cal_left_knee_angle_acc(left_knee_angle,shot_type):
+    left_knee_angle_acc = 0.00
+    if (shot_type == 'drive'):
+        if (left_knee_angle > 180):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle < 90.00):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle >= 90 and left_knee_angle < 100):
+            left_knee_angle_acc = 3.00
+        elif (left_knee_angle >= 100 and left_knee_angle < 110):
+            left_knee_angle_acc = 5.00
+        elif (left_knee_angle >= 110 and left_knee_angle < 120):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 120 and left_knee_angle < 130):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 130 and left_knee_angle < 140):
+            left_knee_angle_acc = 9.00
+        elif (left_knee_angle >= 140 and left_knee_angle < 150):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 150 and left_knee_angle < 160):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 160 and left_knee_angle < 170):
+            left_knee_angle_acc = 5.00
+        elif (left_knee_angle >= 170 and left_knee_angle < 180):
+            left_knee_angle_acc = 3.00
+        elif (left_knee_angle == 135):
+            left_knee_angle_acc = 10.00
+
+        return left_knee_angle_acc
+
+    elif(shot_type == 'pullshot'):
+        return left_knee_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return left_knee_angle_acc
+
+    else:
+        return left_knee_angle_acc
+
+def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
+    left_shoulder_angle_acc = 0.00
+
+    if(shot_type == 'drive'):
+        if (left_shoulder_angle > 120):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle < 90.00):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle >= 90 and left_shoulder_angle < 100):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle >= 100 and left_shoulder_angle < 110):
+            left_shoulder_angle_acc = 9.00
+        elif (left_shoulder_angle >= 110 and left_shoulder_angle < 120):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle == 95):
+            left_shoulder_angle_acc = 10.00
+
+        return left_shoulder_angle_acc
+
+    elif (shot_type == 'pullshot'):
+        return left_shoulder_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return left_shoulder_angle_acc
+
+    else:
+        return left_shoulder_angle_acc
+
+def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
+    left_elbow_angle_acc = 0.00
+
+    if(shot_type == 'drive'):
+        if (left_elbow_angle > 150):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle < 90.00):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle >= 90 and left_elbow_angle < 100):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle >= 110 and left_elbow_angle < 120):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 120 and left_elbow_angle < 130):
+            left_elbow_angle_acc = 9.00
+        elif (left_elbow_angle >= 130 and left_elbow_angle < 140):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 140 and left_elbow_angle < 150):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle == 120):
+            left_elbow_angle_acc = 10.00
+
+        return left_elbow_angle_acc
+
+    elif (shot_type == 'pullshot'):
+        return left_elbow_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return left_elbow_angle_acc
+
+    else:
+        return left_elbow_angle_acc
+
+def cal_right_knee_angle_acc(right_knee_angle, shot_type):
+    right_knee_angle_acc = 0.00
+
+    if(shot_type == 'drive'):
+        if (right_knee_angle > 160):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle < 130.00):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle >= 130 and right_knee_angle < 140):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle >= 140 and right_knee_angle < 150):
+            right_knee_angle_acc = 9.00
+        elif (right_knee_angle >= 150 and right_knee_angle < 160):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle == 135):
+            right_knee_angle_acc = 10.00
+
+        return right_knee_angle_acc
+
+    elif (shot_type == 'pullshot'):
+        return right_knee_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return right_knee_angle_acc
+
+    else:
+        return right_knee_angle_acc
+
+def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
+    right_shoulder_angle_acc = 0.00
+
+    if(shot_type == 'drive'):
+        if (right_shoulder_angle >110):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle < 50.00):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle >= 50 and right_shoulder_angle < 60):
+            right_shoulder_angle_acc = 5.00
+        elif (right_shoulder_angle >= 60 and right_shoulder_angle < 70):
+            right_shoulder_angle_acc = 7.00
+        elif (right_shoulder_angle >= 70 and right_shoulder_angle < 80):
+            right_shoulder_angle_acc = 8.00
+        elif (right_shoulder_angle >= 80 and right_shoulder_angle < 90):
+            right_shoulder_angle_acc = 10.00
+        elif (right_shoulder_angle >= 90 and right_shoulder_angle < 100):
+            right_shoulder_angle_acc = 8.00
+        elif (right_shoulder_angle >= 100 and right_shoulder_angle < 110):
+            right_shoulder_angle_acc = 6.00
+        elif (right_shoulder_angle == 85):
+            right_shoulder_angle_acc = 10.00
+
+        return right_shoulder_angle_acc
+
+    elif (shot_type == 'pullshot'):
+        return right_shoulder_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return right_shoulder_angle_acc
+
+    else:
+        return right_shoulder_angle_acc
+
+def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
+    right_elbow_angle_acc = 0.00
+
+    if(shot_type == 'drive'):
+        if (right_elbow_angle > 160):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle < 90.00):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle >= 90 and right_elbow_angle < 100):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle >= 110 and right_elbow_angle < 120):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 120 and right_elbow_angle < 130):
+            right_elbow_angle_acc = 9.00
+        elif (right_elbow_angle >= 130 and right_elbow_angle < 140):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 140 and right_elbow_angle < 150):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 150 and right_elbow_angle < 160):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle == 125):
+            right_elbow_angle_acc = 10.00
+
+        return right_elbow_angle_acc
+
+    elif (shot_type == 'pullshot'):
+        return right_elbow_angle_acc
+
+    elif (shot_type == 'sweep'):
+        return right_elbow_angle_acc
+
+    else:
+        return right_elbow_angle_acc
+
+def create_frames(uploaded_file):
+    # Create a folder to store the frames
+    folder_name = "video_frames"
+    vid_folder_name = "video_file"
+    if os.path.exists(vid_folder_name):
+        for file_name in os.listdir(vid_folder_name):
+            file_path = os.path.join(vid_folder_name, file_name)
+            os.remove(file_path)
+        os.rmdir(vid_folder_name)
+    if os.path.exists(folder_name):
+        # Remove the existing folder and its contents
+        for file_name in os.listdir(folder_name):
+            file_path = os.path.join(folder_name, file_name)
+            os.remove(file_path)
+        os.rmdir(folder_name)
+    os.makedirs(folder_name, exist_ok=True)
+    os.makedirs(vid_folder_name, exist_ok=True)
+
+    # If the user has uploaded a file
+    if uploaded_file is not None:
+        # Save the uploaded video file to the folder
+        video_path = os.path.join(vid_folder_name, uploaded_file.name)
+        with open(video_path, 'wb') as f:
+            f.write(uploaded_file.getbuffer())
+
+        # Create a VideoCapture object to read the uploaded video
+        video_capture = cv2.VideoCapture(video_path)
+        frame_count = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # Wrap the frame saving code in a Streamlit spinner
+        with st.spinner("Creating  frames from uploaded video..."):
+            # Loop over the frames of the video
+            for frame_index in range(frame_count):
+                # Set the position of the VideoCapture object to the next frame
+                video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+
+                # Read the next frame from the video
+                ret, frame = video_capture.read()
+                if not ret:
+                    break
+
+                # Save the frame as a PNG image with a unique name
+                file_name = os.path.join(folder_name, f"{frame_index}.png")
+                cv2.imwrite(file_name, frame)
+
+        # Release the VideoCapture object
+        video_capture.release()
+        #st.success("Frames Created !")
+def get_image_count():
+    directory_path = "video_frames"
+
+    # List all files in the directory
+    files = os.listdir(directory_path)
+
+    # Count the number of files with image extensions
+    image_extensions = [".jpg", ".jpeg", ".png", ".gif"]
+    image_count = 0
+    for file in files:
+        if os.path.splitext(file)[1].lower() in image_extensions:
+            image_count += 1
+
+    st.write("Number of frames created:", image_count)
+    return image_count
+
+with open('shots_model.pickle', 'rb') as f:
+    model = pickle.load(f)
+
+sequence_length = 70
+
+acc_array = []
+
+def analyze_frames(act, sequence_length, description):
+    with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
+                              min_tracking_confidence=0.5) as holistic:
+        action = act
+
+        with st.spinner("Analyzing Created Frames..."):
+            # Loop through video length, sequence length
+            for frame_num in range(sequence_length):  # sequence_length
+                photo_path = "video_frames\\"
+
+                frame = cv2.imread(photo_path + '\\' + str(frame_num) + ".png")
+
+                image, results = mediapipe_detection(frame, holistic)
+
+                final = extract_body_keypoints(results)
+
+                # LEFT side coordinates
+                left_hip = final[mp_pose.PoseLandmark.LEFT_HIP.value]
+                left_shoulder = final[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+                left_elbow = final[mp_pose.PoseLandmark.LEFT_ELBOW.value]
+                left_wrist = final[mp_pose.PoseLandmark.LEFT_WRIST.value]
+                left_knee = final[mp_pose.PoseLandmark.LEFT_KNEE.value]
+                left_ankle = final[mp_pose.PoseLandmark.LEFT_ANKLE.value]
+
+                # RIGHT side coordinates
+                right_hip = final[mp_pose.PoseLandmark.RIGHT_HIP.value]
+                right_shoulder = final[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+                right_elbow = final[mp_pose.PoseLandmark.RIGHT_ELBOW.value]
+                right_wrist = final[mp_pose.PoseLandmark.RIGHT_WRIST.value]
+                right_knee = final[mp_pose.PoseLandmark.RIGHT_KNEE.value]
+                right_ankle = final[mp_pose.PoseLandmark.RIGHT_ANKLE.value]
+
+                # Left side calculations
+                left_elbow_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
+                left_shoulder_angle = calculate_angle(left_hip, left_shoulder, left_elbow)
+                left_knee_angle = calculate_angle(left_hip, left_knee, left_ankle)
+
+                # Right side calculations
+                right_elbow_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
+                right_shoulder_angle = calculate_angle(right_hip, right_shoulder, right_elbow)
+                right_knee_angle = calculate_angle(right_hip, right_knee, right_ankle)
+
+                left_knee_angle_acc = cal_left_knee_angle_acc(left_knee_angle, action)
+                left_shoulder_angle_acc = cal_left_shoulder_angle_acc(left_shoulder_angle, action)
+                left_elbow_angle_acc = cal_left_elbow_angle_acc(left_elbow_angle, action)
+                right_knee_angle_acc = cal_right_knee_angle_acc(right_knee_angle, action)
+                right_shoulder_angle_acc = cal_right_shoulder_angle_acc(right_shoulder_angle,
+                                                                        action)
+                right_elbow_angle_acc = cal_right_elbow_angle_acc(right_elbow_angle, action)
+
+                # Make a prediction and get the class probabilities
+                score = model.predict_proba(
+                    [[left_knee_angle, left_shoulder_angle, left_elbow_angle, right_knee_angle,
+                      right_shoulder_angle, right_elbow_angle]])
+
+                # Get the probability of each shot type
+                drive_prob = score[0][0]
+                pull_prob = score[0][1]
+                sweep_prob = score[0][2]
+
+                # change the prob for each shot
+                if(action == 'drive'):
+                    final_acc = drive_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
+
+                elif (action == 'sweep'):
+                    final_acc = sweep_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
+
+                if (action == 'pullshot'):
+                    final_acc = pull_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
+                # st.write('Total Accuracy : {:.2f}%'.format(final_acc))
+                acc_array.append(round(final_acc, 2))
+
+        max_value_index = acc_array.index(max(acc_array))
+
+        max_acc = max(acc_array)
+        st.markdown("""
+            <style>
+                .max-acc {
+                    font-size: 36px;
+                    font-weight: bold;
+                    color: white;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        st.markdown(f"<p>Recorded Maximum Accuracy: <span class='max-acc'>  {max_acc}%</span></p>", unsafe_allow_html=True)
+        # st.write('Min Value: ' + str(min(acc_array)))
+        if (max(acc_array) >= 80):
+            st.balloons()
+            st.markdown("""
+                    <p>
+                    Shot Performance: <i style='color:green'>Awsome</i>
+                    </p>
+                    """, unsafe_allow_html=True)
+        elif (max(acc_array) >= 60 and max(acc_array) < 80):
+            st.markdown("""
+                    <p>
+                    Shot Performance: <i style='color:blue'>Great</i>
+                    </p>
+                    """, unsafe_allow_html=True)
+        elif (max(acc_array) >= 30 and max(acc_array) < 60):
+            st.markdown("""
+                    <p>
+                    Shot Performance: <i style='color:yellow'>Neutral</i>
+                    </p>
+                    """, unsafe_allow_html=True)
+        elif (max(acc_array) >= 00 and max(acc_array) < 30):
+            st.markdown("""
+                    <p>
+                    Shot Performance: <i style='color:red'>Weak</i>
+                    </p>
+                    """, unsafe_allow_html=True)
+        else:
+            pass
+
+        # plot the values in the array
+        plt.plot(range(len(acc_array)), acc_array)
+
+        plt.title('Accuracy Variety')
+        # add labels to the x and y axes
+        plt.xlabel('Frame')
+        plt.ylabel('Accuracy (%)')
+
+        # save the plot to a bytes buffer
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+
+        # display the image in Streamlit
+        st.write(' ')
+        st.subheader('Accuracy Variety:')
+        st.image(buffer, use_column_width=True)
+
+        # set the directory where the images are stored
+        image_dir = "video_frames"
+
+        # construct the path to the image using os.path.join()
+        image_path = os.path.join(image_dir, f"{max_value_index}.png")
+
+        max_value_image = Image.open(image_path)
+        caption = 'Frame: ' + str(max_value_index)
+        st.write(' ')
+        st.subheader('Accurate Performed Second/Frame:')
+        st.image(max_value_image, caption=caption, use_column_width=True)
+
+        st.write(' ')
+        st.subheader('Description:')
+        st.info(description)
+
+        st.write(' ')
+        st.write('---')
+        st.header('How this rate calculated?')
+        st.subheader('40% From responsible model')
+        st.write('This AI model gives the proberbilty (a scientific value) of shot been accurated according to it.')
+        st.subheader('60% From body coordinates')
+        st.write('In this software it calculates 6 angles of your body with the extracted body coordinates. then you will get an accurate rate for each angle based on the standerd values that angles should be when perform a accurate shot.')
+
+        data_table = [
+            {'Factor': 'AI Model', 'Weight': '40%'},
+            {'Factor': 'Left Knee Angle', 'Weight': '10%'},
+            {'Factor': 'Right Knee Angle', 'Weight': '10%'},
+            {'Factor': 'Left Shoulder Angle', 'Weight': '10%'},
+            {'Factor': 'Right Shoulder Angle', 'Weight': '10%'},
+            {'Factor': 'Left Elbow Angle', 'Weight': '10%'},
+            {'Factor': 'Right Elbow Angle', 'Weight': '10%'},
+            {'Factor': 'Total', 'Weight': '100%'}
+        ]
+
+        # Create a Pandas DataFrame from your data
+        df = pd.DataFrame(data_table)
+
+        hide_table_row_index = """
+                    <style>
+                    thead tr th:first-child {display:none}
+                    tbody th {display:none}
+                    </style>
+                    """
+
+        # Inject CSS with Markdown
+        st.markdown(hide_table_row_index, unsafe_allow_html=True)
+
+        # Display the table using Streamlit
+        st.table(df)
+
+        st.subheader('Accuracy Rate Formula:')
+        st.markdown("""<p><b>Final Accuracy</b> = <i>AI Model Proberbility * 100 * 0.4 + Left Knee Angle + Left Shoulder Angle +
+                    Left Elbow Angle + Right Knee Angle + Right Shoulder Angle + Right Elbow Angle</i></p>""",
+                    unsafe_allow_html=True)
 ################################################################################################
 ########################################### PROGRAM ############################################
 ################################################################################################
@@ -111,74 +585,52 @@ with st.container():
             if (shot == 'Drive'):
                 bt_shot = 'drive'
 
-                ##### File uploader
-                #uploaded_file = st.file_uploader("Choose a video")
-                #if uploaded_file is not None:
-                #    # To read file as bytes:
-                #    bytes_data = uploaded_file.getvalue()
-                #    st.write(bytes_data)
+                st.set_option('deprecation.showfileUploaderEncoding', False)
 
-                #    # To convert to a string based IO:
-                #    stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-                #    st.write(stringio)
+                # Use the file_uploader function to allow the user to upload a video file
+                uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
 
-                #    # To read file as string:
-                #    string_data = stringio.read()
-                #    st.write(string_data)
+                if uploaded_file is not None:
+                    drivestartbtn = st.button('Start')
 
-                #    # Can be used wherever a "file-like" object is accepted:
-                #    dataframe = pd.read_csv(uploaded_file)
-                #    st.write(dataframe)
-                ##### File uploader
+                    if drivestartbtn:
+                        create_frames(uploaded_file)
+                        sequence_length = get_image_count()
+                        description = 'Practice the Drive shot more !!!'
 
-                drivestartbtn = st.button("Start")
+                        #main method
+                        analyze_frames(bt_shot, sequence_length, description)
 
-                if drivestartbtn:
-
-                    with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
-                                              min_tracking_confidence=0.5) as holistic:
-                        action = bt_shot
-
-                        # Loop through video length, sequence length
-                        with st.spinner('Processing...'):
-                            # Loop through video length, sequence length
-                            for frame_num in range(sequence_length):
-                                start_time = time.time()
-                                photo_path = "dataset\dirve\\"
-
-                                frame = cv2.imread(photo_path + '\\' + str(frame_num) + ".png")
-
-                                image, results = mediapipe_detection(frame, holistic)
-
-                                # Draw landmarks
-                                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                                          mp_drawing.DrawingSpec((255, 0, 0), 1, 1),
-                                                          mp_drawing.DrawingSpec((0, 255, 0), 1, 1)
-                                                          )
-
-                                final = extract_body_keypoints(results)
-
-                                DATA_PATH = 'output'
-                                OUT_PHOTO_PATH = ''
-                                FOLDER_NAME = 'outphoto'
-                                output_photo_path = os.path.join(OUT_PHOTO_PATH, FOLDER_NAME ,action)
-                                npy_path = os.path.join(DATA_PATH, action, str(frame_num) + action)
-                                np.save(npy_path, final)
-                                cv2.imwrite(output_photo_path + '\\' + str(frame_num) + "_with_landmarks.png", image)
-                                end_time = time.time()
-                                processing_time = end_time - start_time
-                                time.sleep(processing_time)
-                            st.success("Operation Completed")
             if (shot == 'Sweep'):
                 bt_shot = 'Sweep'
+
+                st.set_option('deprecation.showfileUploaderEncoding', False)
+
+                # Use the file_uploader function to allow the user to upload a video file
+                uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
+
+                create_frames(uploaded_file)
+
             if (shot == 'pullshot'):
                 bt_shot = 'pullshot'
+
+                pullshotbtn = st.button('Start Training')
+
+                if pullshotbtn:
+                    st.write('done')
 
         if (mode == 'Bowling'):
             bowling_poseses = ['Spin', 'Fast', 'Yoker']
             b_pose = st.selectbox('Select the Bowling Pose', bowling_poseses)
             if (b_pose == 'Spin'):
                 bw_pose = 'Spin'
+
+                spinbtn = st.button('Start TRAINING')
+
+                if spinbtn:
+
+                    st.write('done')
+
             if (b_pose == 'Fast'):
                 bw_pose = 'Fast'
             if (b_pose == 'Yoker'):
@@ -206,7 +658,7 @@ left2, center2, right2 = st.columns(3)
 with left2:
     st.empty()
 with center2:
-    st.markdown("<p style='text-align: center; color: white;'>The AI Powered personal trainer</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: white;'>The AI Powered Performance Analyzer</p>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center; color: white;'>&copy; 2023 <i>iTrainer</i></p>", unsafe_allow_html=True)
 with right2:
     st.empty()
