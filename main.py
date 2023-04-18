@@ -360,7 +360,7 @@ def get_image_count():
         if os.path.splitext(file)[1].lower() in image_extensions:
             image_count += 1
 
-    st.write("Number of frames created:", image_count)
+    st.write("Number of frames created :", image_count)
     return image_count
 
 with open('shots_model.pickle', 'rb') as f:
@@ -431,13 +431,13 @@ def analyze_frames(act, sequence_length, description):
                 sweep_prob = score[0][2]
 
                 # change the prob for each shot
-                if(action == 'drive'):
+                if(action == 'Drive'):
                     final_acc = drive_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
 
-                elif (action == 'sweep'):
+                elif (action == 'Sweep'):
                     final_acc = sweep_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
 
-                if (action == 'pullshot'):
+                if (action == 'Pullshot'):
                     final_acc = pull_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
                 # st.write('Total Accuracy : {:.2f}%'.format(final_acc))
                 acc_array.append(round(final_acc, 2))
@@ -448,59 +448,57 @@ def analyze_frames(act, sequence_length, description):
         st.markdown("""
             <style>
                 .max-acc {
-                    font-size: 36px;
+                    font-size: 34px;
                     font-weight: bold;
                     color: white;
                 }
             </style>
         """, unsafe_allow_html=True)
-        st.markdown(f"<p>Recorded Maximum Accuracy: <span class='max-acc'>  {max_acc}%</span></p>", unsafe_allow_html=True)
         # st.write('Min Value: ' + str(min(acc_array)))
         if (max(acc_array) >= 80):
             st.balloons()
             st.markdown("""
                     <p>
-                    Shot Performance: <i style='color:green'>Awsome</i>
+                    Shot Performance : <i style='color:green'>Awsome</i>
                     </p>
                     """, unsafe_allow_html=True)
+            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
+                        unsafe_allow_html=True)
         elif (max(acc_array) >= 60 and max(acc_array) < 80):
             st.markdown("""
                     <p>
-                    Shot Performance: <i style='color:blue'>Great</i>
+                    Shot Performance : <i style='color:blue'>Great</i>
                     </p>
                     """, unsafe_allow_html=True)
+            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
+                        unsafe_allow_html=True)
         elif (max(acc_array) >= 30 and max(acc_array) < 60):
             st.markdown("""
                     <p>
-                    Shot Performance: <i style='color:yellow'>Neutral</i>
+                    Shot Performance : <i style='color:yellow'>Neutral</i>
                     </p>
                     """, unsafe_allow_html=True)
+            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
+                        unsafe_allow_html=True)
         elif (max(acc_array) >= 00 and max(acc_array) < 30):
             st.markdown("""
                     <p>
-                    Shot Performance: <i style='color:red'>Weak</i>
+                    Shot Performance : <i style='color:red'>Weak</i>
                     </p>
                     """, unsafe_allow_html=True)
+            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
+                        unsafe_allow_html=True)
         else:
             pass
 
-        # plot the values in the array
-        plt.plot(range(len(acc_array)), acc_array)
+        chart_data = []
+        for i, acc in enumerate(acc_array):
+            chart_data.append({'Frame': i, 'Accuracy': acc})
 
-        plt.title('Accuracy Variety')
-        # add labels to the x and y axes
-        plt.xlabel('Frame')
-        plt.ylabel('Accuracy (%)')
-
-        # save the plot to a bytes buffer
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-
-        # display the image in Streamlit
-        st.write(' ')
-        st.subheader('Accuracy Variety:')
-        st.image(buffer, use_column_width=True)
+        # create a DataFrame from the data
+        df = pd.DataFrame(chart_data)
+        st.subheader('Accuracy Variety')
+        st.line_chart(df, x="Frame", y="Accuracy")
 
         # set the directory where the images are stored
         image_dir = "video_frames"
@@ -511,52 +509,67 @@ def analyze_frames(act, sequence_length, description):
         max_value_image = Image.open(image_path)
         caption = 'Frame: ' + str(max_value_index)
         st.write(' ')
-        st.subheader('Accurate Performed Second/Frame:')
+        st.subheader('Best Performed Moment')
         st.image(max_value_image, caption=caption, use_column_width=True)
 
         st.write(' ')
-        st.subheader('Description:')
+        st.subheader('Description')
         st.info(description)
 
         st.write(' ')
         st.write('---')
-        st.header('How this rate calculated?')
-        st.subheader('40% From responsible model')
-        st.write('This AI model gives the proberbilty (a scientific value) of shot been accurated according to it.')
-        st.subheader('60% From body coordinates')
-        st.write('In this software it calculates 6 angles of your body with the extracted body coordinates. then you will get an accurate rate for each angle based on the standerd values that angles should be when perform a accurate shot.')
+        with st.expander(':information_source: How this rate calculated?'):
+            st.subheader('40% From responsible model')
+            st.write('This AI model gives the probability (a scientific value) of shot been accurate according to it.')
+            st.subheader('60% From body coordinates')
+            st.write(
+                'In this software it calculates 6 angles of your body with the extracted body coordinates. '
+                'then you will get an accurate rate for each angle based on the standard values that angles '
+                'should be when perform a accurate shot.')
 
-        data_table = [
-            {'Factor': 'AI Model', 'Weight': '40%'},
-            {'Factor': 'Left Knee Angle', 'Weight': '10%'},
-            {'Factor': 'Right Knee Angle', 'Weight': '10%'},
-            {'Factor': 'Left Shoulder Angle', 'Weight': '10%'},
-            {'Factor': 'Right Shoulder Angle', 'Weight': '10%'},
-            {'Factor': 'Left Elbow Angle', 'Weight': '10%'},
-            {'Factor': 'Right Elbow Angle', 'Weight': '10%'},
-            {'Factor': 'Total', 'Weight': '100%'}
-        ]
+            data_table = [
+                {'Factor': 'AI Model', 'Weight': '40%'},
+                {'Factor': 'Left Knee Angle', 'Weight': '10%'},
+                {'Factor': 'Right Knee Angle', 'Weight': '10%'},
+                {'Factor': 'Left Shoulder Angle', 'Weight': '10%'},
+                {'Factor': 'Right Shoulder Angle', 'Weight': '10%'},
+                {'Factor': 'Left Elbow Angle', 'Weight': '10%'},
+                {'Factor': 'Right Elbow Angle', 'Weight': '10%'},
+                {'Factor': 'Total', 'Weight': '100%'}
+            ]
 
-        # Create a Pandas DataFrame from your data
-        df = pd.DataFrame(data_table)
+            # Create a Pandas DataFrame from your data
+            df = pd.DataFrame(data_table)
 
-        hide_table_row_index = """
-                    <style>
-                    thead tr th:first-child {display:none}
-                    tbody th {display:none}
-                    </style>
-                    """
+            hide_table_row_index = """
+                                <style>
+                                thead tr th:first-child {display:none}
+                                tbody th {display:none}
+                                </style>
+                                """
 
-        # Inject CSS with Markdown
-        st.markdown(hide_table_row_index, unsafe_allow_html=True)
+            # Inject CSS with Markdown
+            st.markdown(hide_table_row_index, unsafe_allow_html=True)
 
-        # Display the table using Streamlit
-        st.table(df)
+            # Display the table using Streamlit
+            st.table(df)
 
-        st.subheader('Accuracy Rate Formula:')
-        st.markdown("""<p><b>Final Accuracy</b> = <i>AI Model Proberbility * 100 * 0.4 + Left Knee Angle + Left Shoulder Angle +
-                    Left Elbow Angle + Right Knee Angle + Right Shoulder Angle + Right Elbow Angle</i></p>""",
-                    unsafe_allow_html=True)
+            st.subheader('Accuracy Rate Formula:')
+            st.markdown("""<p><b>Final Accuracy</b> = <i>(AI Model Probability * 100 * 0.4) + Left Knee Angle + Left Shoulder Angle +
+                                Left Elbow Angle + Right Knee Angle + Right Shoulder Angle + Right Elbow Angle</i></p>""",
+                        unsafe_allow_html=True)
+
+        with st.expander(':confused: Not Satisfied With Accurate Rate?'):
+            st.subheader('Possible ways to increase the accuracy rate. ')
+            st.markdown("""
+                <ul>
+                    <li>Record the video from side view.</li>
+                    <li>Try to crop the video that contains only the performed shot.</li>
+                    <li>Record with high quality camera.</li>
+                    <li>Use high fps value while recording.</li>
+                </ul><br>&nbsp;
+            """, unsafe_allow_html=True)
+
 ################################################################################################
 ########################################### PROGRAM ############################################
 ################################################################################################
@@ -583,23 +596,23 @@ with st.container():
             batting_shots = ['Drive', 'Sweep', 'pullshot']
             shot = st.selectbox('Select the Batting Shot', batting_shots)
             if (shot == 'Drive'):
-                bt_shot = 'drive'
+                bt_shot = 'Drive'
 
                 st.set_option('deprecation.showfileUploaderEncoding', False)
 
                 # Use the file_uploader function to allow the user to upload a video file
-                uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
+                drive_uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
 
-                if uploaded_file is not None:
+                if drive_uploaded_file is not None:
                     drivestartbtn = st.button('Start')
 
                     if drivestartbtn:
-                        create_frames(uploaded_file)
+                        create_frames(drive_uploaded_file)
                         sequence_length = get_image_count()
                         description = 'Practice the Drive shot more !!!'
 
                         #main method
-                        analyze_frames(bt_shot, sequence_length, description)
+                        analyze_frames('Drive', sequence_length, description)
 
             if (shot == 'Sweep'):
                 bt_shot = 'Sweep'
@@ -607,12 +620,21 @@ with st.container():
                 st.set_option('deprecation.showfileUploaderEncoding', False)
 
                 # Use the file_uploader function to allow the user to upload a video file
-                uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
+                sweep_uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
 
-                create_frames(uploaded_file)
+                if sweep_uploaded_file is not None:
+                    sweepstartbtn = st.button('Start')
+
+                    if sweepstartbtn:
+                        create_frames(sweep_uploaded_file)
+                        sequence_length = get_image_count()
+                        description = 'Practice the Sweep shot more !!!'
+
+                        # main method
+                        analyze_frames('Sweep', sequence_length, description)
 
             if (shot == 'pullshot'):
-                bt_shot = 'pullshot'
+                bt_shot = 'Pullshot'
 
                 pullshotbtn = st.button('Start Training')
 
