@@ -135,9 +135,31 @@ def cal_left_knee_angle_acc(left_knee_angle,shot_type):
         return left_knee_angle_acc
 
     elif(shot_type == 'Pullshot'):
+
         return left_knee_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (left_knee_angle > 180):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle < 110.00):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle >= 110 and left_knee_angle < 120):
+            left_knee_angle_acc = 3.00
+        elif (left_knee_angle >= 120 and left_knee_angle < 130):
+            left_knee_angle_acc = 5.00
+        elif (left_knee_angle >= 130 and left_knee_angle < 140):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 140 and left_knee_angle < 150):
+            left_knee_angle_acc = 9.00
+        elif (left_knee_angle >= 150 and left_knee_angle < 160):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 160 and left_knee_angle < 170):
+            left_knee_angle_acc = 5.00
+        elif (left_knee_angle >= 170 and left_knee_angle < 180):
+            left_knee_angle_acc = 3.00
+
+        elif (left_knee_angle == 145):
+            left_knee_angle_acc = 10.00
         return left_knee_angle_acc
 
     else:
@@ -166,6 +188,23 @@ def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
         return left_shoulder_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (left_shoulder_angle > 50):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle < 0.00):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle >= 0 and left_shoulder_angle < 10):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle >= 10 and left_shoulder_angle < 20):
+            left_shoulder_angle_acc = 7.00
+        elif (left_shoulder_angle >= 20 and left_shoulder_angle < 30):
+            left_shoulder_angle_acc = 9.00
+        elif (left_shoulder_angle >= 30 and left_shoulder_angle < 40):
+            left_shoulder_angle_acc = 7.00
+        elif (left_shoulder_angle >= 40 and left_shoulder_angle < 50):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle == 25):
+            left_shoulder_angle_acc = 10.00
+
         return left_shoulder_angle_acc
 
     else:
@@ -198,6 +237,23 @@ def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
         return left_elbow_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (left_elbow_angle > 160):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle < 110.00):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle >= 110 and left_elbow_angle < 120):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle >= 120 and left_elbow_angle < 130):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 130 and left_elbow_angle < 140):
+            left_elbow_angle_acc = 9.00
+        elif (left_elbow_angle >= 140 and left_elbow_angle < 150):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 150 and left_elbow_angle < 160):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle == 135):
+            left_elbow_angle_acc = 10.00
+
         return left_elbow_angle_acc
 
     else:
@@ -226,6 +282,23 @@ def cal_right_knee_angle_acc(right_knee_angle, shot_type):
         return right_knee_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (right_knee_angle > 170):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle < 120.00):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle >= 120 and right_knee_angle < 130):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle >= 130 and right_knee_angle < 140):
+            right_knee_angle_acc = 7.00
+        elif (right_knee_angle >= 140 and right_knee_angle < 150):
+            right_knee_angle_acc = 9.00
+        elif (right_knee_angle >= 150 and right_knee_angle < 160):
+            right_knee_angle_acc = 7.00
+        elif (right_knee_angle >= 160 and right_knee_angle < 170):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle == 145):
+            right_knee_angle_acc = 10.00
+
         return right_knee_angle_acc
 
     else:
@@ -260,6 +333,23 @@ def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
         return right_shoulder_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (right_shoulder_angle >60):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle < 0.00):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle >= 00 and right_shoulder_angle < 10):
+            right_shoulder_angle_acc = 5.00
+        elif (right_shoulder_angle >= 10 and right_shoulder_angle < 20):
+            right_shoulder_angle_acc = 7.00
+        elif (right_shoulder_angle >= 20 and right_shoulder_angle < 30):
+            right_shoulder_angle_acc = 9.00
+        elif (right_shoulder_angle >= 30 and right_shoulder_angle < 40):
+            right_shoulder_angle_acc = 7.00
+        elif (right_shoulder_angle >= 40 and right_shoulder_angle < 50):
+            right_shoulder_angle_acc = 5.00
+        elif (right_shoulder_angle == 25):
+            right_shoulder_angle_acc = 10.00
+
         return right_shoulder_angle_acc
 
     else:
@@ -294,6 +384,27 @@ def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
         return right_elbow_angle_acc
 
     elif (shot_type == 'Sweep'):
+        if (right_elbow_angle > 170):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle < 90.00):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle >= 90 and right_elbow_angle < 100):
+            right_elbow_angle_acc = 3.00
+        elif (right_elbow_angle >= 110 and right_elbow_angle < 120):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle >= 120 and right_elbow_angle < 130):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 130 and right_elbow_angle < 140):
+            right_elbow_angle_acc = 9.00
+        elif (right_elbow_angle >= 140 and right_elbow_angle < 150):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 150 and right_elbow_angle < 160):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle >= 160 and right_elbow_angle < 170):
+            right_elbow_angle_acc = 3.00
+        elif (right_elbow_angle == 135):
+            right_elbow_angle_acc = 10.00
+
         return right_elbow_angle_acc
 
     else:
@@ -370,7 +481,7 @@ sequence_length = 70
 
 acc_array = []
 
-def analyze_frames(act, sequence_length, description):
+def analyze_frames(act, sequence_length):
     with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
                               min_tracking_confidence=0.5) as holistic:
         action = act
@@ -461,24 +572,28 @@ def analyze_frames(act, sequence_length, description):
                     Shot Performance : <i style='color:green'>Awsome</i>
                     </p>
                     """, unsafe_allow_html=True)
+            description = 'You have done a great job !'
         elif (max(acc_array) >= 55 and max(acc_array) < 75):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:blue'>Great</i>
                     </p>
                     """, unsafe_allow_html=True)
+            description = 'Keep doing practice. almost reached to the target !'
         elif (max(acc_array) >= 30 and max(acc_array) < 55):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:yellow'>Neutral</i>
                     </p>
                     """, unsafe_allow_html=True)
+            description = 'Try harder !'
         elif (max(acc_array) >= 00 and max(acc_array) < 30):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:red'>Weak</i>
                     </p>
                     """, unsafe_allow_html=True)
+            description = 'Practice more to become a star !'
 
         else:
             pass
@@ -592,6 +707,7 @@ with st.container():
             shot = st.selectbox('Select the Batting Shot', batting_shots)
             if(shot == 'Select'):
                 pass
+
             if (shot == 'Drive'):
                 bt_shot = 'Drive'
 
@@ -609,7 +725,7 @@ with st.container():
                         description = 'Practice the Drive shot more !!!'
 
                         #main method
-                        analyze_frames('Drive', sequence_length, description)
+                        analyze_frames('Drive', sequence_length)
 
             if (shot == 'Sweep'):
                 bt_shot = 'Sweep'
@@ -628,7 +744,7 @@ with st.container():
                         description = 'Practice the Sweep shot more !!!'
 
                         # main method
-                        analyze_frames('Sweep', sequence_length, description)
+                        analyze_frames('Sweep', sequence_length)
 
             if (shot == 'pullshot'):
                 bt_shot = 'Pullshot'

@@ -1,4 +1,3 @@
-#MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 footer:after{
   content: 'Chameensandeepa';
@@ -7,4 +6,4 @@ footer:after{
   color: tomato;
   height: 1px;
 }
-header {visibility: hidden}
+
