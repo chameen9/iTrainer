@@ -106,7 +106,7 @@ def calculate_angle(a,b,c):
 
 def cal_left_knee_angle_acc(left_knee_angle,shot_type):
     left_knee_angle_acc = 0.00
-    if (shot_type == 'drive'):
+    if (shot_type == 'Drive'):
         if (left_knee_angle > 180):
             left_knee_angle_acc = 1.00
         elif (left_knee_angle < 90.00):
@@ -134,10 +134,10 @@ def cal_left_knee_angle_acc(left_knee_angle,shot_type):
 
         return left_knee_angle_acc
 
-    elif(shot_type == 'pullshot'):
+    elif(shot_type == 'Pullshot'):
         return left_knee_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return left_knee_angle_acc
 
     else:
@@ -146,7 +146,7 @@ def cal_left_knee_angle_acc(left_knee_angle,shot_type):
 def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
     left_shoulder_angle_acc = 0.00
 
-    if(shot_type == 'drive'):
+    if(shot_type == 'Drive'):
         if (left_shoulder_angle > 120):
             left_shoulder_angle_acc = 1.00
         elif (left_shoulder_angle < 90.00):
@@ -162,10 +162,10 @@ def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
 
         return left_shoulder_angle_acc
 
-    elif (shot_type == 'pullshot'):
+    elif (shot_type == 'Pullshot'):
         return left_shoulder_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return left_shoulder_angle_acc
 
     else:
@@ -174,7 +174,7 @@ def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
 def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
     left_elbow_angle_acc = 0.00
 
-    if(shot_type == 'drive'):
+    if(shot_type == 'Drive'):
         if (left_elbow_angle > 150):
             left_elbow_angle_acc = 1.00
         elif (left_elbow_angle < 90.00):
@@ -194,10 +194,10 @@ def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
 
         return left_elbow_angle_acc
 
-    elif (shot_type == 'pullshot'):
+    elif (shot_type == 'Pullshot'):
         return left_elbow_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return left_elbow_angle_acc
 
     else:
@@ -206,7 +206,7 @@ def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
 def cal_right_knee_angle_acc(right_knee_angle, shot_type):
     right_knee_angle_acc = 0.00
 
-    if(shot_type == 'drive'):
+    if(shot_type == 'Drive'):
         if (right_knee_angle > 160):
             right_knee_angle_acc = 1.00
         elif (right_knee_angle < 130.00):
@@ -222,10 +222,10 @@ def cal_right_knee_angle_acc(right_knee_angle, shot_type):
 
         return right_knee_angle_acc
 
-    elif (shot_type == 'pullshot'):
+    elif (shot_type == 'Pullshot'):
         return right_knee_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return right_knee_angle_acc
 
     else:
@@ -234,7 +234,7 @@ def cal_right_knee_angle_acc(right_knee_angle, shot_type):
 def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
     right_shoulder_angle_acc = 0.00
 
-    if(shot_type == 'drive'):
+    if(shot_type == 'Drive'):
         if (right_shoulder_angle >110):
             right_shoulder_angle_acc = 1.00
         elif (right_shoulder_angle < 50.00):
@@ -256,10 +256,10 @@ def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
 
         return right_shoulder_angle_acc
 
-    elif (shot_type == 'pullshot'):
+    elif (shot_type == 'Pullshot'):
         return right_shoulder_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return right_shoulder_angle_acc
 
     else:
@@ -268,7 +268,7 @@ def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
 def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
     right_elbow_angle_acc = 0.00
 
-    if(shot_type == 'drive'):
+    if(shot_type == 'Drive'):
         if (right_elbow_angle > 160):
             right_elbow_angle_acc = 1.00
         elif (right_elbow_angle < 90.00):
@@ -290,10 +290,10 @@ def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
 
         return right_elbow_angle_acc
 
-    elif (shot_type == 'pullshot'):
+    elif (shot_type == 'Pullshot'):
         return right_elbow_angle_acc
 
-    elif (shot_type == 'sweep'):
+    elif (shot_type == 'Sweep'):
         return right_elbow_angle_acc
 
     else:
@@ -416,8 +416,7 @@ def analyze_frames(act, sequence_length, description):
                 left_shoulder_angle_acc = cal_left_shoulder_angle_acc(left_shoulder_angle, action)
                 left_elbow_angle_acc = cal_left_elbow_angle_acc(left_elbow_angle, action)
                 right_knee_angle_acc = cal_right_knee_angle_acc(right_knee_angle, action)
-                right_shoulder_angle_acc = cal_right_shoulder_angle_acc(right_shoulder_angle,
-                                                                        action)
+                right_shoulder_angle_acc = cal_right_shoulder_angle_acc(right_shoulder_angle, action)
                 right_elbow_angle_acc = cal_right_elbow_angle_acc(right_elbow_angle, action)
 
                 # Make a prediction and get the class probabilities
@@ -437,7 +436,7 @@ def analyze_frames(act, sequence_length, description):
                 elif (action == 'Sweep'):
                     final_acc = sweep_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
 
-                if (action == 'Pullshot'):
+                elif (action == 'Pullshot'):
                     final_acc = pull_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
                 # st.write('Total Accuracy : {:.2f}%'.format(final_acc))
                 acc_array.append(round(final_acc, 2))
@@ -455,41 +454,37 @@ def analyze_frames(act, sequence_length, description):
             </style>
         """, unsafe_allow_html=True)
         # st.write('Min Value: ' + str(min(acc_array)))
-        if (max(acc_array) >= 80):
+        if (max(acc_array) >= 75):
             st.balloons()
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:green'>Awsome</i>
                     </p>
                     """, unsafe_allow_html=True)
-            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
-                        unsafe_allow_html=True)
-        elif (max(acc_array) >= 60 and max(acc_array) < 80):
+        elif (max(acc_array) >= 55 and max(acc_array) < 75):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:blue'>Great</i>
                     </p>
                     """, unsafe_allow_html=True)
-            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
-                        unsafe_allow_html=True)
-        elif (max(acc_array) >= 30 and max(acc_array) < 60):
+        elif (max(acc_array) >= 30 and max(acc_array) < 55):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:yellow'>Neutral</i>
                     </p>
                     """, unsafe_allow_html=True)
-            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
-                        unsafe_allow_html=True)
         elif (max(acc_array) >= 00 and max(acc_array) < 30):
             st.markdown("""
                     <p>
                     Shot Performance : <i style='color:red'>Weak</i>
                     </p>
                     """, unsafe_allow_html=True)
-            st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max_acc}%</span>",
-                        unsafe_allow_html=True)
+
         else:
             pass
+
+        st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max(acc_array)}%</span>",
+                    unsafe_allow_html=True)
 
         chart_data = []
         for i, acc in enumerate(acc_array):
@@ -593,8 +588,10 @@ with st.container():
             st.empty()
 
         if (mode == 'Batting'):
-            batting_shots = ['Drive', 'Sweep', 'pullshot']
+            batting_shots = ['Select', 'Drive', 'Sweep', 'Pullshot']
             shot = st.selectbox('Select the Batting Shot', batting_shots)
+            if(shot == 'Select'):
+                pass
             if (shot == 'Drive'):
                 bt_shot = 'Drive'
 
