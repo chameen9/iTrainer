@@ -1,17 +1,13 @@
 import mediapipe as mp
 import streamlit as st
-import pickle
-import matplotlib.pyplot as plt
-import io
-import pandas as pd
-import numpy as np                  # for array manipulation and mathematical operations
-import cv2                          # open-source computer vision library
-import os                           # for interacting with the operating system
-import requests                     # for making HTTP requests
-import streamlit_lottie as lottie   # for displaying animation in streamlit
-from PIL import Image               # for opening and manipulating image files
-import time                         # for getting current time and performing time-related operations
-import datetime
+import pickle                       # For serializing and deserializing objects
+import pandas as pd                 # For data analysis and manipulation
+import numpy as np                  # For array manipulation and mathematical operations
+import cv2                          # For computer vision tasks
+import os                           # For interacting with the operating system
+import requests                     # For making HTTP requests
+import streamlit_lottie as lottie   # For displaying animation in streamlit
+from PIL import Image               # For opening and manipulating image files
 
 ################################################################################################
 ######################################## WEB CONFIG ############################################
@@ -52,9 +48,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 mp_holistic = mp.solutions.holistic # Holistic model
 pose = mp_pose.Pose()
 # initialize mediaPipe pose solution
-
-# No of photos in the folder
-#sequence_length = 70
 
 def mediapipe_detection(image, model):
     #print("entered mediapipe detection")
@@ -107,7 +100,7 @@ def calculate_angle(a,b,c):
 def cal_left_knee_angle_acc(left_knee_angle,shot_type):
     left_knee_angle_acc = 0.00
     if (shot_type == 'Drive'):
-        if (left_knee_angle > 180):
+        if (left_knee_angle >= 180):
             left_knee_angle_acc = 1.00
         elif (left_knee_angle < 90.00):
             left_knee_angle_acc = 1.00
@@ -135,11 +128,30 @@ def cal_left_knee_angle_acc(left_knee_angle,shot_type):
         return left_knee_angle_acc
 
     elif(shot_type == 'Pullshot'):
+        if (left_knee_angle >= 180):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle < 120.00):
+            left_knee_angle_acc = 1.00
+        elif (left_knee_angle >= 120 and left_knee_angle < 130):
+            left_knee_angle_acc = 3.00
+        elif (left_knee_angle >= 130 and left_knee_angle < 140):
+            left_knee_angle_acc = 5.00
+        elif (left_knee_angle >= 140 and left_knee_angle < 150):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 150 and left_knee_angle < 160):
+            left_knee_angle_acc = 9.00
+        elif (left_knee_angle >= 160 and left_knee_angle < 170):
+            left_knee_angle_acc = 7.00
+        elif (left_knee_angle >= 170 and left_knee_angle < 180):
+            left_knee_angle_acc = 5.00
+
+        elif (left_knee_angle == 155):
+            left_knee_angle_acc = 10.00
 
         return left_knee_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (left_knee_angle > 180):
+        if (left_knee_angle >= 180):
             left_knee_angle_acc = 1.00
         elif (left_knee_angle < 110.00):
             left_knee_angle_acc = 1.00
@@ -169,7 +181,7 @@ def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
     left_shoulder_angle_acc = 0.00
 
     if(shot_type == 'Drive'):
-        if (left_shoulder_angle > 120):
+        if (left_shoulder_angle >= 120):
             left_shoulder_angle_acc = 1.00
         elif (left_shoulder_angle < 90.00):
             left_shoulder_angle_acc = 1.00
@@ -185,10 +197,27 @@ def cal_left_shoulder_angle_acc(left_shoulder_angle,shot_type):
         return left_shoulder_angle_acc
 
     elif (shot_type == 'Pullshot'):
+        if (left_shoulder_angle >= 90):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle < 40.00):
+            left_shoulder_angle_acc = 1.00
+        elif (left_shoulder_angle >= 40 and left_shoulder_angle < 50):
+            left_shoulder_angle_acc = 3.00
+        elif (left_shoulder_angle >= 50 and left_shoulder_angle < 60):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle >= 60 and left_shoulder_angle < 70):
+            left_shoulder_angle_acc = 9.00
+        elif (left_shoulder_angle >= 70 and left_shoulder_angle < 80):
+            left_shoulder_angle_acc = 5.00
+        elif (left_shoulder_angle >= 80 and left_shoulder_angle < 90):
+            left_shoulder_angle_acc = 3.00
+        elif (left_shoulder_angle == 65):
+            left_shoulder_angle_acc = 10.00
+
         return left_shoulder_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (left_shoulder_angle > 50):
+        if (left_shoulder_angle >= 50):
             left_shoulder_angle_acc = 1.00
         elif (left_shoulder_angle < 0.00):
             left_shoulder_angle_acc = 1.00
@@ -214,7 +243,7 @@ def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
     left_elbow_angle_acc = 0.00
 
     if(shot_type == 'Drive'):
-        if (left_elbow_angle > 150):
+        if (left_elbow_angle >= 150):
             left_elbow_angle_acc = 1.00
         elif (left_elbow_angle < 90.00):
             left_elbow_angle_acc = 1.00
@@ -234,10 +263,27 @@ def cal_left_elbow_angle_acc(left_elbow_angle,shot_type):
         return left_elbow_angle_acc
 
     elif (shot_type == 'Pullshot'):
+        if (left_elbow_angle >= 150):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle < 100.00):
+            left_elbow_angle_acc = 1.00
+        elif (left_elbow_angle >= 100 and left_elbow_angle < 110):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle >= 110 and left_elbow_angle < 120):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 120 and left_elbow_angle < 130):
+            left_elbow_angle_acc = 9.00
+        elif (left_elbow_angle >= 130 and left_elbow_angle < 140):
+            left_elbow_angle_acc = 7.00
+        elif (left_elbow_angle >= 140 and left_elbow_angle < 150):
+            left_elbow_angle_acc = 5.00
+        elif (left_elbow_angle == 125):
+            left_elbow_angle_acc = 10.00
+
         return left_elbow_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (left_elbow_angle > 160):
+        if (left_elbow_angle >= 160):
             left_elbow_angle_acc = 1.00
         elif (left_elbow_angle < 110.00):
             left_elbow_angle_acc = 1.00
@@ -263,7 +309,7 @@ def cal_right_knee_angle_acc(right_knee_angle, shot_type):
     right_knee_angle_acc = 0.00
 
     if(shot_type == 'Drive'):
-        if (right_knee_angle > 160):
+        if (right_knee_angle >= 160):
             right_knee_angle_acc = 1.00
         elif (right_knee_angle < 130.00):
             right_knee_angle_acc = 1.00
@@ -279,10 +325,27 @@ def cal_right_knee_angle_acc(right_knee_angle, shot_type):
         return right_knee_angle_acc
 
     elif (shot_type == 'Pullshot'):
+        if (right_knee_angle >= 180):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle < 130.00):
+            right_knee_angle_acc = 1.00
+        elif (right_knee_angle >= 130 and right_knee_angle < 140):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle >= 140 and right_knee_angle < 150):
+            right_knee_angle_acc = 7.00
+        elif (right_knee_angle >= 150 and right_knee_angle < 160):
+            right_knee_angle_acc = 9.00
+        elif (right_knee_angle >= 160 and right_knee_angle < 170):
+            right_knee_angle_acc = 7.00
+        elif (right_knee_angle >= 170 and right_knee_angle < 180):
+            right_knee_angle_acc = 5.00
+        elif (right_knee_angle == 155):
+            right_knee_angle_acc = 10.00
+
         return right_knee_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (right_knee_angle > 170):
+        if (right_knee_angle >= 170):
             right_knee_angle_acc = 1.00
         elif (right_knee_angle < 120.00):
             right_knee_angle_acc = 1.00
@@ -308,7 +371,7 @@ def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
     right_shoulder_angle_acc = 0.00
 
     if(shot_type == 'Drive'):
-        if (right_shoulder_angle >110):
+        if (right_shoulder_angle >= 110):
             right_shoulder_angle_acc = 1.00
         elif (right_shoulder_angle < 50.00):
             right_shoulder_angle_acc = 1.00
@@ -330,10 +393,27 @@ def cal_right_shoulder_angle_acc(right_shoulder_angle, shot_type):
         return right_shoulder_angle_acc
 
     elif (shot_type == 'Pullshot'):
+        if (right_shoulder_angle >= 80):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle < 30.00):
+            right_shoulder_angle_acc = 1.00
+        elif (right_shoulder_angle >= 30 and right_shoulder_angle < 40):
+            right_shoulder_angle_acc = 5.00
+        elif (right_shoulder_angle >= 40 and right_shoulder_angle < 50):
+            right_shoulder_angle_acc = 7.00
+        elif (right_shoulder_angle >= 50 and right_shoulder_angle < 60):
+            right_shoulder_angle_acc = 9.00
+        elif (right_shoulder_angle >= 60 and right_shoulder_angle < 70):
+            right_shoulder_angle_acc = 7.00
+        elif (right_shoulder_angle >= 70 and right_shoulder_angle < 80):
+            right_shoulder_angle_acc = 5.00
+        elif (right_shoulder_angle == 55):
+            right_shoulder_angle_acc = 10.00
+
         return right_shoulder_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (right_shoulder_angle >60):
+        if (right_shoulder_angle >= 60):
             right_shoulder_angle_acc = 1.00
         elif (right_shoulder_angle < 0.00):
             right_shoulder_angle_acc = 1.00
@@ -359,7 +439,7 @@ def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
     right_elbow_angle_acc = 0.00
 
     if(shot_type == 'Drive'):
-        if (right_elbow_angle > 160):
+        if (right_elbow_angle >= 160):
             right_elbow_angle_acc = 1.00
         elif (right_elbow_angle < 90.00):
             right_elbow_angle_acc = 1.00
@@ -381,10 +461,27 @@ def cal_right_elbow_angle_acc(right_elbow_angle, shot_type):
         return right_elbow_angle_acc
 
     elif (shot_type == 'Pullshot'):
+        if (right_elbow_angle >= 140):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle < 90.00):
+            right_elbow_angle_acc = 1.00
+        elif (right_elbow_angle >= 90 and right_elbow_angle < 100):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle >= 90 and right_elbow_angle < 100):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 110 and right_elbow_angle < 120):
+            right_elbow_angle_acc = 9.00
+        elif (right_elbow_angle >= 120 and right_elbow_angle < 130):
+            right_elbow_angle_acc = 7.00
+        elif (right_elbow_angle >= 130 and right_elbow_angle < 140):
+            right_elbow_angle_acc = 5.00
+        elif (right_elbow_angle == 115):
+            right_elbow_angle_acc = 10.00
+
         return right_elbow_angle_acc
 
     elif (shot_type == 'Sweep'):
-        if (right_elbow_angle > 170):
+        if (right_elbow_angle >= 170):
             right_elbow_angle_acc = 1.00
         elif (right_elbow_angle < 90.00):
             right_elbow_angle_acc = 1.00
@@ -475,7 +572,7 @@ def get_image_count():
     return image_count
 
 with open('shots_model.pickle', 'rb') as f:
-    model = pickle.load(f)
+    shot_model = pickle.load(f)
 
 sequence_length = 70
 
@@ -531,7 +628,7 @@ def analyze_frames(act, sequence_length):
                 right_elbow_angle_acc = cal_right_elbow_angle_acc(right_elbow_angle, action)
 
                 # Make a prediction and get the class probabilities
-                score = model.predict_proba(
+                score = shot_model.predict_proba(
                     [[left_knee_angle, left_shoulder_angle, left_elbow_angle, right_knee_angle,
                       right_shoulder_angle, right_elbow_angle]])
 
@@ -703,12 +800,12 @@ with st.container():
             st.empty()
 
         if (mode == 'Batting'):
-            batting_shots = ['Select', 'Drive', 'Sweep', 'Pullshot']
+            batting_shots = ['Select', 'Cover Drive', 'Sweep', 'Pull']
             shot = st.selectbox('Select the Batting Shot', batting_shots)
             if(shot == 'Select'):
                 pass
 
-            if (shot == 'Drive'):
+            if (shot == 'Cover Drive'):
                 bt_shot = 'Drive'
 
                 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -722,7 +819,6 @@ with st.container():
                     if drivestartbtn:
                         create_frames(drive_uploaded_file)
                         sequence_length = get_image_count()
-                        description = 'Practice the Drive shot more !!!'
 
                         #main method
                         analyze_frames('Drive', sequence_length)
@@ -741,26 +837,35 @@ with st.container():
                     if sweepstartbtn:
                         create_frames(sweep_uploaded_file)
                         sequence_length = get_image_count()
-                        description = 'Practice the Sweep shot more !!!'
 
                         # main method
                         analyze_frames('Sweep', sequence_length)
 
-            if (shot == 'pullshot'):
+            if (shot == 'Pull'):
                 bt_shot = 'Pullshot'
 
-                pullshotbtn = st.button('Start Training')
+                st.set_option('deprecation.showfileUploaderEncoding', False)
 
-                if pullshotbtn:
-                    st.write('done')
+                # Use the file_uploader function to allow the user to upload a video file
+                pullshot_uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
+
+                if pullshot_uploaded_file is not None:
+                    pullshotstartbtn = st.button('Start')
+
+                    if pullshotstartbtn:
+                        create_frames(pullshot_uploaded_file)
+                        sequence_length = get_image_count()
+
+                        # main method
+                        analyze_frames('Pullshot', sequence_length)
 
         if (mode == 'Bowling'):
-            bowling_poseses = ['Spin', 'Fast', 'Yoker']
+            bowling_poseses = ['Off-Spin', 'Fast', 'Yoker']
             b_pose = st.selectbox('Select the Bowling Pose', bowling_poseses)
-            if (b_pose == 'Spin'):
+            if (b_pose == 'Off-Spin'):
                 bw_pose = 'Spin'
 
-                spinbtn = st.button('Start TRAINING')
+                spinbtn = st.button('Start')
 
                 if spinbtn:
 
@@ -768,8 +873,10 @@ with st.container():
 
             if (b_pose == 'Fast'):
                 bw_pose = 'Fast'
+                pass
             if (b_pose == 'Yoker'):
                 bw_pose = 'Yoker'
+                pass
         with right:
             st.empty()
 
