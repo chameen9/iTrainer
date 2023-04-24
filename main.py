@@ -1,6 +1,6 @@
-import mediapipe as mp
-import streamlit as st
-import sqlite3
+import mediapipe as mp              # For get body coordinates
+import streamlit as st              # For web configs
+import sqlite3                      # For database operations
 import pickle                       # For serializing and deserializing objects
 import pandas as pd                 # For data analysis and manipulation
 import numpy as np                  # For array manipulation and mathematical operations
@@ -9,11 +9,9 @@ import os                           # For interacting with the operating system
 import requests                     # For making HTTP requests
 import streamlit_lottie as lottie   # For displaying animation in streamlit
 from PIL import Image               # For opening and manipulating image files
-from datetime import datetime
+from datetime import datetime       # For get the current datetime
 
-################################################################################################
 ######################################## WEB CONFIG ############################################
-################################################################################################
 xIcon = Image.open("images/Xicon.ico")
 
 #Set Page config
@@ -40,26 +38,23 @@ local_css("style/style.css")
 lottie_gradient = load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_anre6w2q.json")
 logo = Image.open("images/Logo.png")
 
-################################################################################################
-######################################## MODEL CONFIG ##########################################
-################################################################################################
+###################################### MediaPipe CONFIG ########################################
 
 # initialize mediaPipe pose solution
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 mp_holistic = mp.solutions.holistic # Holistic model
 pose = mp_pose.Pose()
-# initialize mediaPipe pose solution
 
 def mediapipe_detection(image, model):
-    #print("entered mediapipe detection")
+    #st.write("entered mediapipe detection")
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
     image.flags.writeable = False                  # Image is no longer writeable
     results = model.process(image)                 # Make prediction
     image.flags.writeable = True                   # Image is now writeable
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # COLOR CONVERSION RGB 2 BGR
     return image, results
-    #print("left mediapipe detection")
+    #st.write("left mediapipe detection")
 
 def draw_landmarks(image, results):  # draw landmarks and connection
     mp_drawing.draw_landmarks(image, results.pose_landmarks.landmark, mp_holistic.POSE_CONNECTIONS)
@@ -73,7 +68,6 @@ def draw_styled_landmarks(image, results):  # draw the dots and connections on i
 
 def extract_body_keypoints(results):
     kp = np.array([[res.x, res.y, res.z] for res in results.pose_landmarks.landmark]) if results.pose_landmarks else np.zeros((33,3))
-    #print (kp)
     #st.write(kp)
     return kp
 
@@ -87,6 +81,7 @@ def load_image(image_file):
     img = Image.open(image_file)
     return img
 
+###################################### Custome Methods #########################################
 def calculate_angle(a,b,c):
     a = np.array(a)
     b = np.array(b)
@@ -99,6 +94,7 @@ def calculate_angle(a,b,c):
         angle = 360-angle
     return angle
 
+#Define DB
 connection = sqlite3.connect('data.db')
 cursor = connection.cursor()
 
@@ -106,6 +102,7 @@ table_create_command = """CREATE TABLE IF NOT EXISTS
     details(id INTEGER PRIMARY KEY AUTOINCREMENT, acc_value FLOAT, status TEXT, date DATETIME)
 """
 
+#Angel accuracy calculation methods
 def cal_left_knee_angle_acc(left_knee_angle,shot_type):
     left_knee_angle_acc = 0.00
     if (shot_type == 'Drive'):
@@ -564,6 +561,7 @@ def create_frames(uploaded_file):
         # Release the VideoCapture object
         video_capture.release()
         #st.success("Frames Created !")
+
 def get_image_count():
     directory_path = "video_frames"
 
@@ -587,6 +585,7 @@ sequence_length = 70
 
 acc_array = []
 
+#main method
 def analyze_frames(act, sequence_length):
     with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
                               min_tracking_confidence=0.5) as holistic:
@@ -797,9 +796,7 @@ def analyze_frames(act, sequence_length):
                 </ul><br>&nbsp;
             """, unsafe_allow_html=True)
 
-################################################################################################
 ########################################### PROGRAM ############################################
-################################################################################################
 
 with st.container():
     left, center, right = st.columns(3)
@@ -901,20 +898,15 @@ with st.container():
         if (mode == 'View Data'):
             cursor.execute("SELECT id AS 'ID', acc_value AS 'Accuracy Rate', status AS 'Status', date AS 'Date' FROM details ORDER BY date")
             dtls = cursor.fetchall()
-            # Define the HTML table header
             table = "<table align='center'>\n<thead>\n<tr>\n<th>#</th>\n\n<th>Accuracy</th>\n<th>Status</th>\n<th>Date</th>\n</tr>\n</thead>\n<tbody>\n"
 
-            # Loop through the rows of the result set and add each row to the table
             for row in dtls:
                 table += "<tr>\n<td>{}</td>\n\n<td>{}%</td>\n<td>{}</td>\n<td>{}</td>\n</tr>\n".format(row[0], row[1], row[2], row[3])
 
-            # Close the table
             table += "</tbody>\n</table>"
 
-            # Display the table using Markdown
             st.markdown(table, unsafe_allow_html=True)
 
-            # Close the database connection
             connection.close()
 
 
