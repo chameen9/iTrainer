@@ -1,13 +1,13 @@
 keras==2.12.0
 matplotlib==3.7.1
-mediapipe==0.9.1.0
-numpy==1.24.2
+mediapipe==0.9.3.0
+numpy==1.24.3
 opencv_contrib_python==4.7.0.72
 pandas==1.5.3
 Pillow==9.5.0
 Pillow==9.5.0
 Requests==2.28.2
 scikit_learn==1.2.2
-streamlit==1.20.0
+streamlit==1.21.0
 streamlit_lottie==0.0.3
-~ensorflow_intel==2.11.0
+tensorflow==2.12.0
