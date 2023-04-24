@@ -1,5 +1,6 @@
 import mediapipe as mp
 import streamlit as st
+import sqlite3
 import pickle                       # For serializing and deserializing objects
 import pandas as pd                 # For data analysis and manipulation
 import numpy as np                  # For array manipulation and mathematical operations
@@ -8,6 +9,7 @@ import os                           # For interacting with the operating system
 import requests                     # For making HTTP requests
 import streamlit_lottie as lottie   # For displaying animation in streamlit
 from PIL import Image               # For opening and manipulating image files
+from datetime import datetime
 
 ################################################################################################
 ######################################## WEB CONFIG ############################################
@@ -96,6 +98,13 @@ def calculate_angle(a,b,c):
     if angle > 180.0:
         angle = 360-angle
     return angle
+
+connection = sqlite3.connect('data.db')
+cursor = connection.cursor()
+
+table_create_command = """CREATE TABLE IF NOT EXISTS
+    details(id INTEGER PRIMARY KEY AUTOINCREMENT, acc_value FLOAT, status TEXT, date DATETIME)
+"""
 
 def cal_left_knee_angle_acc(left_knee_angle,shot_type):
     left_knee_angle_acc = 0.00
@@ -651,7 +660,6 @@ def analyze_frames(act, sequence_length):
 
         max_value_index = acc_array.index(max(acc_array))
 
-        max_acc = max(acc_array)
         st.markdown("""
             <style>
                 .max-acc {
@@ -670,6 +678,7 @@ def analyze_frames(act, sequence_length):
                     </p>
                     """, unsafe_allow_html=True)
             description = 'You have done a great job !'
+            status = 'Awsome'
         elif (max(acc_array) >= 55 and max(acc_array) < 75):
             st.markdown("""
                     <p>
@@ -677,6 +686,7 @@ def analyze_frames(act, sequence_length):
                     </p>
                     """, unsafe_allow_html=True)
             description = 'Keep doing practice. almost reached to the target !'
+            status = 'Great'
         elif (max(acc_array) >= 30 and max(acc_array) < 55):
             st.markdown("""
                     <p>
@@ -684,6 +694,7 @@ def analyze_frames(act, sequence_length):
                     </p>
                     """, unsafe_allow_html=True)
             description = 'Try harder !'
+            status = 'Neutral'
         elif (max(acc_array) >= 00 and max(acc_array) < 30):
             st.markdown("""
                     <p>
@@ -691,9 +702,18 @@ def analyze_frames(act, sequence_length):
                     </p>
                     """, unsafe_allow_html=True)
             description = 'Practice more to become a star !'
-
+            status = 'Weak'
         else:
             pass
+            status = 'Error'
+
+        #Db Operations
+        cursor.execute(table_create_command)
+        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        values = (max(acc_array), status, current_datetime)
+        cursor.execute("INSERT INTO details (acc_value, status, date) VALUES (?, ?, ?)", values)
+        connection.commit()
+        connection.close()
 
         st.markdown(f"Recorded Maximum Accuracy : <span class='max-acc'>  {max(acc_array)}%</span>",
                     unsafe_allow_html=True)
@@ -794,7 +814,7 @@ with st.container():
         # lottie.st_lottie(lottie_coding, height=100, width=100, key="ball",loop=False,reverse=False)
         st.write("Please select the training mode that you want.")
         st.write("##")
-        mode = st.selectbox('Select the Mode', ('Select', 'Batting', 'Bowling'))
+        mode = st.selectbox('Select the Mode', ('Select', 'Batting', 'Bowling', 'View Data'))
 
         if (mode == 'Select'):
             st.empty()
@@ -877,10 +897,31 @@ with st.container():
             if (b_pose == 'Yoker'):
                 bw_pose = 'Yoker'
                 pass
+
+        if (mode == 'View Data'):
+            cursor.execute("SELECT id AS 'ID', acc_value AS 'Accuracy Rate', status AS 'Status', date AS 'Date' FROM details ORDER BY date")
+            dtls = cursor.fetchall()
+            # Define the HTML table header
+            table = "<table align='center'>\n<thead>\n<tr>\n<th>#</th>\n\n<th>Accuracy</th>\n<th>Status</th>\n<th>Date</th>\n</tr>\n</thead>\n<tbody>\n"
+
+            # Loop through the rows of the result set and add each row to the table
+            for row in dtls:
+                table += "<tr>\n<td>{}</td>\n\n<td>{}%</td>\n<td>{}</td>\n<td>{}</td>\n</tr>\n".format(row[0], row[1], row[2], row[3])
+
+            # Close the table
+            table += "</tbody>\n</table>"
+
+            # Display the table using Markdown
+            st.markdown(table, unsafe_allow_html=True)
+
+            # Close the database connection
+            connection.close()
+
+
         with right:
             st.empty()
 
-col1,col2,col3,col4,col5,col6,col7 = st.columns(7)
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 with col1:
     st.empty()
 with col2:

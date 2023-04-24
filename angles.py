@@ -137,7 +137,7 @@ with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
 
         print(final)
 
-        with open("drive_shot.csv", "a", newline="") as f:
+        with open("shots_data.csv", "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(final)
 
