@@ -7,4 +7,4 @@ Pillow==9.5.0
 Requests==2.28.2
 streamlit==1.21.0
 streamlit_lottie==0.0.3
-scikit-learn==1.0.2s
+scikit-learn==1.0.2
