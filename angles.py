@@ -1,15 +1,8 @@
 import mediapipe as mp
-import pandas as pd
 import csv
-import streamlit as st
 import numpy as np                  # for array manipulation and mathematical operations
 import cv2                          # open-source computer vision library
 import os                           # for interacting with the operating system
-import requests                     # for making HTTP requests
-import streamlit_lottie as lottie   # for displaying animation in streamlit
-from PIL import Image               # for opening and manipulating image files
-import time                         # for getting current time and performing time-related operations
-import datetime
 
 
 # initialize mediaPipe pose solution
@@ -68,11 +61,11 @@ def calculate_angle(a,b,c):
 
 with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
                           min_tracking_confidence=0.5) as holistic:
-    action = 'drive'
+    action = 'offspin'
 
     # Loop through video length, sequence length
     for frame_num in range(sequence_length):  # sequence_length
-        photo_path = "dataset\drive\\"
+        photo_path = "dataset\offspin\\"
 
         frame = cv2.imread(photo_path + '\\' + str(frame_num) + ".png")
 
@@ -132,12 +125,12 @@ with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
 
         # concatenate body coordinates with angles
         #final = np.concatenate((final, all_angles), axis=1)
-        final = np.concatenate((all_angles[0], all_angles[1], all_angles[2], all_angles[3], all_angles[4], all_angles[5], np.array(['drive'], dtype=object)))
+        final = np.concatenate((all_angles[0], all_angles[1], all_angles[2], all_angles[3], all_angles[4], all_angles[5], np.array(['offspin'], dtype=object)))
         #final = all_angles
 
         print(final)
 
-        with open("shots_data.csv", "a", newline="") as f:
+        with open("final.csv", "a", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(final)
 

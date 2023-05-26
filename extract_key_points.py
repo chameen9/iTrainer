@@ -66,11 +66,11 @@ def calculate_angle(a,b,c):
 
 with mp_holistic.Holistic(static_image_mode=True, min_detection_confidence=0.5,
                           min_tracking_confidence=0.5) as holistic:
-    action = 'sweep'
+    action = 'offspin'
 
     # Loop through video length, sequence length
     for frame_num in range(sequence_length):  # sequence_length
-        photo_path = "dataset\sweep\\"
+        photo_path = "dataset\offspin\\"
 
         frame = cv2.imread(photo_path + '\\' + str(frame_num) + ".png")
 

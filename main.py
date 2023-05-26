@@ -644,6 +644,7 @@ def analyze_frames(act, sequence_length):
                 drive_prob = score[0][0]
                 pull_prob = score[0][1]
                 sweep_prob = score[0][2]
+                offspin_prob = score[0][3]
 
                 # change the prob for each shot
                 if(action == 'Drive'):
@@ -654,6 +655,10 @@ def analyze_frames(act, sequence_length):
 
                 elif (action == 'Pullshot'):
                     final_acc = pull_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
+
+                elif (action == 'offspin'):
+                    final_acc = offspin_prob * 100 * 0.4 + left_knee_angle_acc + left_shoulder_angle_acc + left_elbow_angle_acc + right_knee_angle_acc + right_shoulder_angle_acc + right_elbow_angle_acc
+
                 # st.write('Total Accuracy : {:.2f}%'.format(final_acc))
                 acc_array.append(round(final_acc, 2))
 
@@ -877,16 +882,27 @@ with st.container():
                         analyze_frames('Pullshot', sequence_length)
 
         if (mode == 'Bowling'):
-            bowling_poseses = ['Off-Spin', 'Fast', 'Yoker']
+            bowling_poseses = ['Select','Off-Spin', 'Fast', 'Yoker']
             b_pose = st.selectbox('Select the Bowling Pose', bowling_poseses)
             if (b_pose == 'Off-Spin'):
-                bw_pose = 'Spin'
+                st.empty()
+            if (b_pose == 'Off-Spin'):
+                bwl_shot = 'offspin'
 
-                spinbtn = st.button('Start')
+                st.set_option('deprecation.showfileUploaderEncoding', False)
 
-                if spinbtn:
+                # Use the file_uploader function to allow the user to upload a video file
+                offspin_uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "avi", "MOV", "mkv"])
 
-                    st.write('done')
+                if offspin_uploaded_file is not None:
+                    offspinstartbtn = st.button('Start')
+
+                    if offspinstartbtn:
+                        create_frames(offspin_uploaded_file)
+                        sequence_length = get_image_count()
+
+                        # main method
+                        analyze_frames('offspin', sequence_length)
 
             if (b_pose == 'Fast'):
                 bw_pose = 'Fast'

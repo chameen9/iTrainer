@@ -7,7 +7,7 @@ import os
 
 # Function to rename multiple files
 def main():
-    folder = "dataset\pullshot\DONE"
+    folder = "dataset\offspin"
     for count, filename in enumerate(os.listdir(folder)):
         dst = f"{str(count)}.png"
         src = f"{folder}/{filename}"  # foldername/filename, if .py file is outside folder
